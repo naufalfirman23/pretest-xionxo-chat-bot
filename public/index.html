@@ -1,0 +1,128 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chatbot Sederhana</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    #chatBox {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    .bubble {
+      max-width: 80%;
+      padding: 10px 15px;
+      border-radius: 15px;
+      margin: 5px 0;
+      display: inline-block;
+      word-wrap: break-word;
+    }
+    .user {
+      align-self: flex-end;
+      background-color: #dcf8c6;
+      color: #000;
+      border-bottom-right-radius: 0;
+    }
+    .bot {
+      align-self: flex-start;
+      background-color: #e2e2e2;
+      color: #000;
+      border-bottom-left-radius: 0;
+    }
+    #inputArea {
+      display: flex;
+      gap: 5px;
+    }
+    #userInput {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4caf50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h2>Chatbot AI</h2>
+  <div id="chatBox"></div>
+
+  <div id="inputArea">
+    <input type="text" id="userInput" placeholder="Tulis pesan..." />
+    <button onclick="sendMessage()">Kirim</button>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const chatBox = document.getElementById("chatBox");
+      const message = input.value.trim();
+      if (!message) return;
+
+      // Tampilkan pesan pengguna
+      const userMsg = document.createElement("div");
+      userMsg.className = "bubble user";
+      userMsg.textContent = message;
+      chatBox.appendChild(userMsg);
+
+      input.value = "";
+
+      // Kirim ke server
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        });
+
+        const data = await res.json();
+
+        // Tampilkan balasan bot
+        const botMsg = document.createElement("div");
+        botMsg.className = "bubble bot";
+        botMsg.textContent = data.reply;
+        chatBox.appendChild(botMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        const errorMsg = document.createElement("div");
+        errorMsg.className = "bubble bot";
+        errorMsg.style.color = "red";
+        errorMsg.textContent = "Terjadi kesalahan. Coba lagi nanti.";
+        chatBox.appendChild(errorMsg);
+      }
+    }
+
+    // Tekan enter = kirim pesan
+    document.getElementById("userInput").addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
